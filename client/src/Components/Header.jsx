@@ -11,7 +11,7 @@ const Header = () => {
         w={6}
         h={6}
         alt="Thread-Clone Logo"
-        src={colorMode === "dark" ? "/light-logo.svg" : "dark-logo.svg"}
+        src={colorMode === "dark" ? "/light-logo.svg" : "/dark-logo.svg"}
         onClick={toggleColorMode}
       />
     </Flex>

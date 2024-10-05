@@ -10,6 +10,7 @@ const Actions = ({ liked, setLiked }) => {
 				role='img'
 				viewBox='0 0 24 22'
 				width='20'
+				cursor={"pointer"}
 				onClick={() => setLiked(!liked)}
 			>
 				<path
@@ -18,7 +19,7 @@ const Actions = ({ liked, setLiked }) => {
 					strokeWidth='2'
 				></path>
 			</svg>
-			<svg aria-label='Comment' color='' fill='' height='20' role='img' viewBox='0 0 24 24' width='20'>
+			<svg cursor={"pointer"} aria-label='Comment' color='' fill='' height='20' role='img' viewBox='0 0 24 24' width='20'>
 				<title>Comment</title>
 				<path
 					d='M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z'
@@ -29,6 +30,7 @@ const Actions = ({ liked, setLiked }) => {
 				></path>
 			</svg>
 			<svg
+			cursor={"pointer"}
 				aria-label='Repost'
 				color='currentColor'
 				fill='currentColor'
@@ -44,6 +46,7 @@ const Actions = ({ liked, setLiked }) => {
 				></path>
 			</svg>
 			<svg
+			cursor={"pointer"}
 				aria-label='Share'
 				color=''
 				fill='rgb(243, 245, 247)'
