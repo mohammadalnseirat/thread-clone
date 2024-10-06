@@ -1,5 +1,6 @@
 import { generateTokenAndSetCookie } from "../lib/generateTokenAndSetCookie.js";
 import User from "../models/user.model.js";
+import cloudinary from "../config/cloudinary.js";
 import { handleErrors } from "../utils/error.js";
 import bcryptjs from "bcryptjs";
 
@@ -74,7 +75,7 @@ const signUp_Post = async (req, res, next) => {
   }
 };
 
-// 2-Function to sign in a user:
+// 3-Function to sign in a user:
 const signIn_Post = async (req, res, next) => {
   try {
     const { username, password } = req.body;
@@ -103,7 +104,7 @@ const signIn_Post = async (req, res, next) => {
   }
 };
 
-// 3-Function to log out a user:
+// 4-Function to log out a user:
 const logOut_Post = async (req, res, next) => {
   try {
     // ! remove the cookie:
@@ -116,7 +117,7 @@ const logOut_Post = async (req, res, next) => {
   }
 };
 
-// 4-Function to follow/unfollow a user:
+// 5-Function to follow/unfollow a user:
 const followUnFollow_Post = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -153,4 +154,71 @@ const followUnFollow_Post = async (req, res, next) => {
     next(error);
   }
 };
-export { signUp_Post, signIn_Post, logOut_Post, followUnFollow_Post };
+
+// 6-Function to update user:
+const updateUser_Put = async (req, res, next) => {
+  const { id } = req.params;
+  const userId = req.user._id;
+  const { name, username, email, password, bio } = req.body;
+  let profilePic = req.body;
+  try {
+    //! find the user:
+    let user = await User.findById(userId.toString());
+    if (!user) {
+      return next(handleErrors(404, "User Not Found!"));
+    }
+    if (id.toString() !== userId.toString()) {
+      return next(handleErrors(400, "You Can't Update Others Profile!"));
+    }
+    //! check password, and Update:
+    if (password) {
+      const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/;
+      if (!passwordRegex.test(password)) {
+        return next(
+          handleErrors(400, "Invalid Password, Please Enter A Valid Password!")
+        );
+      }
+      //! hash the password:
+      const hashedPassword = bcryptjs.hashSync(password, 15);
+      user.password = hashedPassword;
+    }
+
+    // // //! check profilePic, and Update:
+    // if (profilePic) {
+    //   if (user.profilePic) {
+    //     await cloudinary.uploader.destroy(
+    //       user.profilePic.split("/").pop().split(".")[0]
+    //     );
+    //   }
+    //   const uploadResponsePicture = await cloudinary.uploader.upload(
+    //     profilePic
+    //   );
+    //   user.profilePic = uploadResponsePicture.secure_url;
+    // }
+
+    //! update the user:
+    user.name = name || user.name;
+    user.username = username || user.username;
+    user.email = email || user.email;
+    user.bio = bio || user.bio;
+    //! save the user:
+    const savedUser = await user.save();
+
+    res.status(200).json({
+      message: "User Updated Successfully",
+      user: savedUser,
+    });
+    //! Find all posts that this user replied and update username and userProfilePic fields
+  } catch (error) {
+    console.log("Error Creating Updating User Api Route", error.message);
+    next(error);
+  }
+};
+export {
+  signUp_Post,
+  signIn_Post,
+  logOut_Post,
+  followUnFollow_Post,
+  updateUser_Put,
+};
