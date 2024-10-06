@@ -74,4 +74,32 @@ const signUp_Post = async (req, res, next) => {
   }
 };
 
-export { signUp_Post };
+// 2-Function to sign in a user:
+const signIn_Post = async (req, res, next) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password || username === "" || password === "") {
+      return next(handleErrors(400, "all fields are required!"));
+    }
+    const user = await User.findOne({ username });
+    // ! check if user not exists:
+    if (!user) {
+      return next(handleErrors(404, "User Not Found,Please Sign Up First!"));
+    }
+    const isMatchPawword = bcryptjs.compareSync(password, user?.password || "");
+    // ! check if password is match:
+    if (!isMatchPawword) {
+      return next(handleErrors(400, "Invalid Credentials!"));
+    }
+
+    // ! generate token:
+    generateTokenAndSetCookie(user._id, res);
+    // ! send response:
+    const { password: pass, ...rest } = user._doc;
+    res.status(200).json(rest);
+  } catch (error) {
+    console.log("Error Creating Sign In User", error.message);
+    next(error);
+  }
+};
+export { signUp_Post, signIn_Post };
