@@ -102,4 +102,17 @@ const signIn_Post = async (req, res, next) => {
     next(error);
   }
 };
-export { signUp_Post, signIn_Post };
+
+// 3-Function to log out a user:
+const logOut_Post = async (req, res, next) => {
+  try {
+    // ! remove the cookie:
+    res.cookie("access_token", "", { maxAge: 1 });
+    // ! send response:
+    res.status(200).json({ message: "Logged Out Successfully" });
+  } catch (error) {
+    console.log("Error Logging Out User", error.message);
+    next(error);
+  }
+};
+export { signUp_Post, signIn_Post, logOut_Post };
