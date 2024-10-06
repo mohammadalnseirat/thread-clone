@@ -115,4 +115,42 @@ const logOut_Post = async (req, res, next) => {
     next(error);
   }
 };
-export { signUp_Post, signIn_Post, logOut_Post };
+
+// 4-Function to follow/unfollow a user:
+const followUnFollow_Post = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    // !Find The User To Be Followed:
+    const userToModified = await User.findById(id);
+    // !Find The Logged In User(current User):
+    const currentUser = await User.findById(req.user._id);
+    if (id.toString() === req.user._id.toString()) {
+      return next(handleErrors(400, "You Can't Follow Yourself!"));
+    }
+
+    // check if there is a userToModified or currentUser:
+    if (!userToModified || !currentUser) {
+      return next(handleErrors(404, "User Not Found!"));
+    }
+
+    // check if the userToModified is already followed by the currentUser:
+    const isFollowed = currentUser.following.includes(id);
+    if (isFollowed) {
+      // !Unfollow The User:
+      // ! Modify currentUser Following Array , Modify userToModified Followers Array:
+      await User.findByIdAndUpdate(id, { $pull: { followers: req.user._id } }); // update followers array for the user,
+      await User.findByIdAndUpdate(req.user._id, { $pull: { following: id } }); // update following array for the currentUser
+      res.status(200).json({ message: "Unfollowed Successfully" });
+    } else {
+      // !Follow The User:
+      // ! Modify currentUser Following Array , Modify userToModified Followers Array:
+      await User.findByIdAndUpdate(id, { $push: { followers: req.user._id } });
+      await User.findByIdAndUpdate(req.user._id, { $push: { following: id } });
+      res.status(200).json({ message: "Followed Successfully" });
+    }
+  } catch (error) {
+    console.log("Error Following/Unfollowing User", error.message);
+    next(error);
+  }
+};
+export { signUp_Post, signIn_Post, logOut_Post, followUnFollow_Post };
