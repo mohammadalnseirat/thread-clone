@@ -128,13 +128,11 @@ const followUnFollow_Post = async (req, res, next) => {
     if (id.toString() === req.user._id.toString()) {
       return next(handleErrors(400, "You Can't Follow Yourself!"));
     }
-
-    // check if there is a userToModified or currentUser:
+    //! check if there is a userToModified or currentUser:
     if (!userToModified || !currentUser) {
       return next(handleErrors(404, "User Not Found!"));
     }
-
-    // check if the userToModified is already followed by the currentUser:
+    //! check if the userToModified is already followed by the currentUser:
     const isFollowed = currentUser.following.includes(id);
     if (isFollowed) {
       // !Unfollow The User:
@@ -204,7 +202,6 @@ const updateUser_Put = async (req, res, next) => {
     user.bio = bio || user.bio;
     //! save the user:
     const savedUser = await user.save();
-
     res.status(200).json({
       message: "User Updated Successfully",
       user: savedUser,
@@ -215,10 +212,30 @@ const updateUser_Put = async (req, res, next) => {
     next(error);
   }
 };
+
+// 7-Function To Get User Profile:
+const getUserProfile_Get = async (req, res, next) => {
+  //! We will fetch user profile either with username or userId
+  //! query is either username or userId
+  const { username } = req.params;
+  try {
+    const user = await User.findOne({ username })
+      .select("-password")
+      .select("-updatedAt");
+    if (!user) {
+      return next(handleErrors(404, "User Not Found!"));
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.log("Error Creating Get User Profile Api Route", error.message);
+    next(error);
+  }
+};
 export {
   signUp_Post,
   signIn_Post,
   logOut_Post,
   followUnFollow_Post,
   updateUser_Put,
+  getUserProfile_Get,
 };
