@@ -168,10 +168,33 @@ const replyPost_Post = async (req, res, next) => {
   }
 };
 
+// 6-Function To Get Feed Posts:
+const getFeedPosts = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    //! Find The User:
+    const user = await User.findById(userId);
+    if (!user) {
+      return next(handleErrors(404, "User Not Found!"));
+    }
+    // !Get The Following Users That Current User Follows:
+    const following = user.following;
+    console.log(following)
+    // !Get The Posts From The Following Users:
+    const feedposts = await Post.find({ postedBy: { $in: following } }).sort({
+      createdAt: -1,
+    });
+    res.status(200).json(feedposts);
+  } catch (error) {
+    console.log("Error Creating Get Feed Posts Api Route:", error.message);
+    next(error);
+  }
+};
 export {
   createPost_Post,
   getPost_Get,
   deletePost_Delete,
   likeUnLikePost_Post,
   replyPost_Post,
+  getFeedPosts,
 };
