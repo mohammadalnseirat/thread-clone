@@ -102,4 +102,31 @@ const deletePost_Delete = async (req, res, next) => {
   }
 };
 
-export { createPost_Post, getPost_Get, deletePost_Delete };
+// 4-Function To Like/Unlike Post:
+const likeUnLikePost_Post = async (req, res, next) => {
+  const { id: postId } = req.params;
+  const userId = req.user._id;
+  try {
+    const post = await Post.findById(postId);
+    if (!post) {
+      return next(handleErrors(404, "Post Not Found!"));
+    }
+    // !check if the user already liked the post:
+    const userLikedPost = post.likes.includes(userId.toString());
+    if (userLikedPost) {
+      // !unLike Post:
+      await Post.updateOne({ _id: postId }, { $pull: { likes: userId } });
+      res.status(200).json({ message: "Post Unliked Successfully!" });
+    } else {
+      // !Like Post:
+      await Post.updateOne({ _id: postId }, { $push: { likes: userId } });
+      await post.save();
+      res.status(200).json({ message: "Post Liked Successfully!" });
+    }
+  } catch (error) {
+    console.log("Error Creating Like/unlike post Api Route: ", error.message);
+    next(error);
+  }
+};
+
+export { createPost_Post, getPost_Get, deletePost_Delete, likeUnLikePost_Post };
