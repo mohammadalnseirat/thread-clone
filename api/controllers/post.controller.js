@@ -71,4 +71,35 @@ const getPost_Get = async (req, res, next) => {
   }
 };
 
-export { createPost_Post, getPost_Get };
+// 3-Function To Delete Post:
+const deletePost_Delete = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const post = await Post.findById(id);
+    if (!post) {
+      return next(handleErrors(404, "Post Not Found!"));
+    }
+    //! check the Owner of post:
+    if (post.postedBy.toString() !== req.user._id.toString()) {
+      return next(
+        handleErrors(
+          401,
+          "Unauthorized, You are not allowed to delete this post!"
+        )
+      );
+    }
+    // // !check image and delete:
+    // if (post.image) {
+    //   const imagePuplicId = post.image.split("/").pop().split(".")[0];
+    //   await cloudinary.uploader.destroy(imagePuplicId);
+    // }
+    // !delete the post:
+    await Post.findByIdAndDelete(id);
+    res.status(200).json({ message: "Post has been Deleted  Successfully" });
+  } catch (error) {
+    console.log("Error Deleting Postr:", error.message);
+    next(error);
+  }
+};
+
+export { createPost_Post, getPost_Get, deletePost_Delete };
