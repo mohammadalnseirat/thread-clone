@@ -129,4 +129,49 @@ const likeUnLikePost_Post = async (req, res, next) => {
   }
 };
 
-export { createPost_Post, getPost_Get, deletePost_Delete, likeUnLikePost_Post };
+// 5-Function To Reply Post:
+const replyPost_Post = async (req, res, next) => {
+  try {
+    const { id: postId } = req.params;
+    const userId = req.user._id;
+    const userProfilePic = req.user.profilePic;
+    const username = req.user.username;
+    const { text } = req.body;
+
+    if (!text || text === "") {
+      returnnext(handleErrors(400, "Text is required!"));
+    }
+    // !Find the post:
+    const post = await Post.findById(postId);
+    if (!post) {
+      return next(handleErrors(404, "Post Not Found!"));
+    }
+    //! create reply:
+    const reply = {
+      userId,
+      userProfilePic,
+      username,
+      text,
+    };
+    // !save the reply to reply array:
+    post.replies.push(reply);
+    // !save the post:
+    await post.save();
+    // !send response back:
+    res.status(200).json({
+      message: "Reply added Successfully",
+      post,
+    });
+  } catch (error) {
+    console.log("Error Creating Reply Post Api Route:", error.message);
+    next(error);
+  }
+};
+
+export {
+  createPost_Post,
+  getPost_Get,
+  deletePost_Delete,
+  likeUnLikePost_Post,
+  replyPost_Post,
+};
