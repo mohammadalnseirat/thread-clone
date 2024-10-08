@@ -2,10 +2,12 @@ import { Button, useColorModeValue, useToast } from "@chakra-ui/react";
 import React from "react";
 import { useSetRecoilState } from "recoil";
 import userAtom from "../atom/userAtom";
+import useShowToast from "../hooks/useShowToast";
 
 const LoggOutButton = () => {
   const setUser = useSetRecoilState(userAtom);
-  const toast = useToast();
+  // const toast = useToast();
+  const showToast = useShowToast();
 
   // handle logout:
   const handleLogout = async () => {
@@ -18,35 +20,21 @@ const LoggOutButton = () => {
       });
       const data = await res.json();
       if (!res.ok) {
-        toast({
-          title: "Error",
-          description: data.message,
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
+        showToast("Error", data.message, "error");
         return;
       }
       if (res.ok) {
         // !remove the user from local storage:
         localStorage.removeItem("auth-threads");
         setUser(null);
-        toast({
-          title: "Success",
-          description: "You have logged out successfully!",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
+        showToast(
+          "Success",
+          "User has been logged out successfully",
+          "success"
+        );
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to log out. Please try again later.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
+      showToast("Error", "Failed to log out. Please try again later", "error");
     }
   };
   return (

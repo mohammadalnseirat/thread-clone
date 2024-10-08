@@ -18,67 +18,53 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
-import {  useSetRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import authScreenAtom from "../atom/authAtom";
 import userAtom from "../atom/userAtom";
+import useShowToast from "../hooks/useShowToast";
 
 export default function SignupCard() {
   const [formData, setFormData] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-  const setUser = useSetRecoilState(userAtom)
-  const toast = useToast()
+  const setUser = useSetRecoilState(userAtom);
+  // const toast = useToast()
+  const showToast = useShowToast();
   // ! To Toggle between signup and signin:
-  const setAuthScreen = useSetRecoilState(authScreenAtom)
+  const setAuthScreen = useSetRecoilState(authScreenAtom);
   //! handle Change Input:
   const handleChangeInput = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
   };
 
   //! handle Submit The Data:
-  const handleSubmitData = async ()=>{
+  const handleSubmitData = async () => {
     try {
-      const res = await fetch('/api/v1/users/signup',{
-        method: 'POST',
-        headers:{
-          'Content-Type':'application/json'
+      const res = await fetch("/api/v1/users/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData)
-      })
-      const data = await res.json()
-      
-      if(!res.ok){
-        toast({
-          title: 'Error',
-          description: data.message,
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        })
-        return
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast("Error", data.message, "error");
+        return;
       }
-      if(res.ok){
+      if (res.ok) {
         // !set the data in local storage:
-        localStorage.setItem('auth-threads',JSON.stringify(data))
-        setUser(data)
-        toast({
-          title: 'Success',
-          description:'User Created Successfully',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        })
+        localStorage.setItem("auth-threads", JSON.stringify(data));
+        setUser(data);
+        showToast(
+          "Success",
+          "User has been signed up successfully!",
+          "success"
+        );
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      })
+      showToast("Error", error.message, "error");
     }
-    
-  }
+  };
   return (
     <Flex align={"center"} justify={"center"}>
       <Stack spacing={8} mx={"auto"} maxW={"lg"} py={8} px={6}>
@@ -157,7 +143,7 @@ export default function SignupCard() {
                   color={"blue.500"}
                   fontWeight={"semibold"}
                   fontSize={"md"}
-                  onClick={()=>setAuthScreen('signin')}
+                  onClick={() => setAuthScreen("signin")}
                 >
                   Sign In
                 </Link>
