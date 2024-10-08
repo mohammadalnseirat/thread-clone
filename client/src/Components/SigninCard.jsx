@@ -6,7 +6,6 @@ import {
   FormLabel,
   Input,
   InputGroup,
-  HStack,
   InputRightElement,
   Stack,
   Button,
@@ -17,14 +16,47 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
-import {  useSetRecoilState } from "recoil";
+import { useSetRecoilState } from "recoil";
 import authScreenAtom from "../atom/authAtom";
+import useShowToast from "../hooks/useShowToast";
+import userAtom from "../atom/userAtom";
 
 export default function SigninCard() {
   const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({});
+  const showToast = useShowToast();
   // ! To Toggle between signup and signin(useSetRecoilState):
-  const setAuthScreen = useSetRecoilState(authScreenAtom)
-
+  const setAuthScreen = useSetRecoilState(authScreenAtom);
+  const setUser = useSetRecoilState(userAtom);
+  // !handle Change Inputs:
+  const handleChangeInputs = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value.trim() });
+  };
+  // !handle Submit Data:
+  const handleSbmitData = async () => {
+    try {
+      const res = await fetch("/api/v1/users/signin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast("Error", data.message, "error");
+        return;
+      }
+      if (res.ok) {
+        // !set the data in local storage:
+        localStorage.setItem("auth-threads", JSON.stringify(data));
+        setUser(data);
+        showToast("Success", "User Signed In Successfully!", "success");
+      }
+    } catch (error) {
+      showToast("Error", error.message, "error");
+    }
+  };
   return (
     <Flex align={"center"} justify={"center"}>
       <Stack spacing={8} mx={"auto"} maxW={"lg"} py={8} px={6}>
@@ -47,13 +79,21 @@ export default function SigninCard() {
             <Box>
               <FormControl isRequired>
                 <FormLabel>Username:</FormLabel>
-                <Input type="text" />
+                <Input
+                  type="text"
+                  id="username"
+                  onChange={handleChangeInputs}
+                />
               </FormControl>
             </Box>
             <FormControl isRequired>
               <FormLabel>Password:</FormLabel>
               <InputGroup>
-                <Input type={showPassword ? "text" : "password"} />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  onChange={handleChangeInputs}
+                />
                 <InputRightElement h={"full"}>
                   <Button
                     variant={"ghost"}
@@ -75,6 +115,7 @@ export default function SigninCard() {
                 _hover={{
                   bg: useColorModeValue("gray.700", "gray.800"),
                 }}
+                onClick={handleSbmitData}
               >
                 Sign In
               </Button>
@@ -86,7 +127,7 @@ export default function SigninCard() {
                   color={"blue.500"}
                   fontWeight={"semibold"}
                   fontSize={"md"}
-                  onClick={()=>setAuthScreen("signup")}
+                  onClick={() => setAuthScreen("signup")}
                 >
                   Sign Up
                 </Link>
