@@ -17,9 +17,13 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
+import {  useSetRecoilState } from "recoil";
+import authScreenAtom from "../atom/authAtom";
 
 export default function SigninCard() {
   const [showPassword, setShowPassword] = useState(false);
+  // ! To Toggle between signup and signin(useSetRecoilState):
+  const setAuthScreen = useSetRecoilState(authScreenAtom)
 
   return (
     <Flex align={"center"} justify={"center"}>
@@ -82,6 +86,7 @@ export default function SigninCard() {
                   color={"blue.500"}
                   fontWeight={"semibold"}
                   fontSize={"md"}
+                  onClick={()=>setAuthScreen("signup")}
                 >
                   Sign Up
                 </Link>
