@@ -3,6 +3,7 @@ import React from "react";
 import { useSetRecoilState } from "recoil";
 import userAtom from "../atom/userAtom";
 import useShowToast from "../hooks/useShowToast";
+import { RiLogoutCircleRLine } from "react-icons/ri";
 
 const LoggOutButton = () => {
   const setUser = useSetRecoilState(userAtom);
@@ -47,7 +48,7 @@ const LoggOutButton = () => {
       right={"30px"}
       size={"sm"}
     >
-      Log Out
+      <RiLogoutCircleRLine size={24} title="Log out"/>
     </Button>
   );
 };

@@ -8,6 +8,24 @@ import bcryptjs from "bcryptjs";
 export const test_get = (req, res, next) => {
   res.send("This is a test route");
 };
+// 7-Function To Get User Profile:
+const getUserProfile_Get = async (req, res, next) => {
+  //! We will fetch user profile either with username or userId
+  //! query is either username or userId
+  const { username } = req.params;
+  try {
+    const user = await User.findOne({ username })
+      .select("-password")
+      .select("-updatedAt");
+    if (!user) {
+      return next(handleErrors(404, "User Not Found!"));
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.log("Error Creating Get User Profile Api Route", error.message);
+    next(error);
+  }
+};
 
 // 2-Function to sign up a new user:
 const signUp_Post = async (req, res, next) => {
@@ -155,57 +173,45 @@ const followUnFollow_Post = async (req, res, next) => {
 
 // 6-Function to update user:
 const updateUser_Put = async (req, res, next) => {
-  const { id } = req.params;
+  const { name, email, username, password, bio } = req.body;
+  let { profilePic } = req.body;
   const userId = req.user._id;
-  const { name, username, email, password, bio } = req.body;
-  let profilePic = req.body;
   try {
-    //! find the user:
-    let user = await User.findById(userId.toString());
+    let user = await User.findById(userId);
+    // !check if user exists:
     if (!user) {
-      return next(handleErrors(404, "User Not Found!"));
+      return next(handleErrors(404, "User Not Found"));
     }
-    if (id.toString() !== userId.toString()) {
-      return next(handleErrors(400, "You Can't Update Others Profile!"));
+    // !check the user is owner or not:
+    if (req.params.id !== userId.toString()) {
+      return next(handleErrors(403, "You can only update your own profile"));
     }
-    //! check password, and Update:
     if (password) {
-      const passwordRegex =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/;
-      if (!passwordRegex.test(password)) {
-        return next(
-          handleErrors(400, "Invalid Password, Please Enter A Valid Password!")
-        );
-      }
-      //! hash the password:
-      const hashedPassword = bcryptjs.hashSync(password, 15);
+      const salt = await bcryptjs.genSalt(15);
+      const hashedPassword = await bcryptjs.hash(password, salt);
       user.password = hashedPassword;
     }
+    // !Update Profile Pic Using Cloudinary:
+    if (profilePic) {
+      if (user.profilePic) {
+        await cloudinary.uploader.destroy(
+          user.profilePic.split("/").pop().split(".")[0]
+        );
+      }
+      const uploadedResponse = await cloudinary.uploader.upload(profilePic);
+      profilePic = uploadedResponse.secure_url;
+    }
 
-    // // //! check profilePic, and Update:
-    // if (profilePic) {
-    //   if (user.profilePic) {
-    //     await cloudinary.uploader.destroy(
-    //       user.profilePic.split("/").pop().split(".")[0]
-    //     );
-    //   }
-    //   const uploadResponsePicture = await cloudinary.uploader.upload(
-    //     profilePic
-    //   );
-    //   user.profilePic = uploadResponsePicture.secure_url;
-    // }
-
-    //! update the user:
     user.name = name || user.name;
-    user.username = username || user.username;
     user.email = email || user.email;
+    user.username = username || user.username;
+    user.profilePic = profilePic || user.profilePic;
     user.bio = bio || user.bio;
-    //! save the user:
-    const savedUser = await user.save();
-    res.status(200).json({
-      message: "User Updated Successfully",
-      user: savedUser,
-    });
+
+    user = await user.save();
+    // !password must be null in response:
+    user.password = null;
+    res.status(200).json(user);
     //! Find all posts that this user replied and update username and userProfilePic fields
   } catch (error) {
     console.log("Error Creating Updating User Api Route", error.message);
@@ -213,24 +219,6 @@ const updateUser_Put = async (req, res, next) => {
   }
 };
 
-// 7-Function To Get User Profile:
-const getUserProfile_Get = async (req, res, next) => {
-  //! We will fetch user profile either with username or userId
-  //! query is either username or userId
-  const { username } = req.params;
-  try {
-    const user = await User.findOne({ username })
-      .select("-password")
-      .select("-updatedAt");
-    if (!user) {
-      return next(handleErrors(404, "User Not Found!"));
-    }
-    res.status(200).json(user);
-  } catch (error) {
-    console.log("Error Creating Get User Profile Api Route", error.message);
-    next(error);
-  }
-};
 export {
   signUp_Post,
   signIn_Post,
