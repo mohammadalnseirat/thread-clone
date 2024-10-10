@@ -44,6 +44,10 @@ const UserHeader = ({ userProfile }) => {
       showToast("Error", "Please login to follow/unfollow user", "error");
       return;
     }
+    if(updating){
+      showToast("Error", "Please wait while we process your request", "error");
+      return;
+    }
     setUpdating(true);
     try {
       const res = await fetch(`/api/v1/users/follow/${userProfile._id}`, {

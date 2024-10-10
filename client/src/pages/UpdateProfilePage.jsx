@@ -30,6 +30,10 @@ export default function UpdateProfilePage() {
   const { handleImageChange, imageUrl } = usePreviewImage();
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (updating) {
+      showToast("Error", "Please wait while we process your request", "error");
+      return;
+    }
     setUpdating(true);
     try {
       const res = await fetch(`/api/v1/users/updateprofile/${user._id}`, {
