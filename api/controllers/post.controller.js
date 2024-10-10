@@ -32,11 +32,11 @@ const createPost_Post = async (req, res, next) => {
         )
       );
     }
-    // // !Check The Image and Upload Image:
-    // if (image) {
-    //   const uploadReponseImage = await cloudinary.uploader.upload(image);
-    //   image = uploadReponseImage.secure_url;
-    // }
+    // !Check The Image and Upload Image:
+    if (image) {
+      const uploadReponseImage = await cloudinary.uploader.upload(image);
+      image = uploadReponseImage.secure_url;
+    }
     // !Create The Post:
     const newPost = new Post({
       postedBy,
@@ -179,7 +179,7 @@ const getFeedPosts = async (req, res, next) => {
     }
     // !Get The Following Users That Current User Follows:
     const following = user.following;
-    console.log(following)
+    console.log(following);
     // !Get The Posts From The Following Users:
     const feedposts = await Post.find({ postedBy: { $in: following } }).sort({
       createdAt: -1,
