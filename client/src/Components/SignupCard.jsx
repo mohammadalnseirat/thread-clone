@@ -24,6 +24,7 @@ import userAtom from "../atom/userAtom";
 import useShowToast from "../hooks/useShowToast";
 
 export default function SignupCard() {
+  const [updating, setUpdating] = useState(false);
   const [formData, setFormData] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const setUser = useSetRecoilState(userAtom);
@@ -38,6 +39,7 @@ export default function SignupCard() {
 
   //! handle Submit The Data:
   const handleSubmitData = async () => {
+    setUpdating(true);
     try {
       const res = await fetch("/api/v1/users/signup", {
         method: "POST",
@@ -63,6 +65,8 @@ export default function SignupCard() {
       }
     } catch (error) {
       showToast("Error", error.message, "error");
+    } finally {
+      setUpdating(false);
     }
   };
   return (
@@ -124,7 +128,7 @@ export default function SignupCard() {
             </FormControl>
             <Stack spacing={10} pt={2}>
               <Button
-                loadingText="Submitting"
+                loadingText="Signing up..."
                 size="lg"
                 bg={useColorModeValue("gray.600", "gray.700")}
                 color={"white"}
@@ -132,6 +136,8 @@ export default function SignupCard() {
                   bg: useColorModeValue("gray.700", "gray.800"),
                 }}
                 onClick={handleSubmitData}
+                isLoading={updating}
+                spinnerPlacement="end"
               >
                 Sign up
               </Button>

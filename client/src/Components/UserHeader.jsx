@@ -1,6 +1,7 @@
 import {
   Avatar,
   Box,
+  Button,
   Flex,
   Link,
   Menu,
@@ -12,24 +13,73 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useState } from "react";
 import { BsInstagram } from "react-icons/bs";
 import { CgMoreO } from "react-icons/cg";
+import useShowToast from "../hooks/useShowToast";
+import { useRecoilValue } from "recoil";
+import userAtom from "../atom/userAtom";
+import { Link as RouterLink } from "react-router-dom";
 
-const UserHeader = () => {
-  const toast = useToast();
-  // handle Copy URL:
+const UserHeader = ({ userProfile }) => {
+  // !get cureent user:
+  const currentUser = useRecoilValue(userAtom);
+  // !state to following user:
+  const [following, setFollowing] = useState(
+    userProfile.followers.includes(currentUser?._id)
+  );
+  // !state For Loading:
+  const [updating, setUpdating] = useState(false);
+  const showToast = useShowToast();
+  //! handle Copy URL:
   const handleCopyURL = () => {
     const currentUrl = window.location.href;
     navigator.clipboard.writeText(currentUrl).then(() => {
-      toast({
-        title: "Copied to clipboard.",
-        description: "URL copied to clipboard successfully!",
-        status: "success",
-        duration: 2000,
-        isClosable: true,
-      });
+      showToast("Success", "URL copied to clipboard successfully", "success");
     });
+  };
+  // !handle Follow Unfollow User:
+  const handleFollowUnfollowSubmit = async () => {
+    if (!currentUser) {
+      showToast("Error", "Please login to follow/unfollow user", "error");
+      return;
+    }
+    setUpdating(true);
+    try {
+      const res = await fetch(`/api/v1/users/follow/${userProfile._id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast("Error", data.message, "error");
+        return;
+      }
+      if (following) {
+        // ?unfollow user:
+        showToast(
+          "Success",
+          `Unfollowed ${userProfile.name} successfully!`,
+          "success"
+        );
+        userProfile.followers.pop(); //! simulate removing from followers
+      } else {
+        // ?follow user:
+        showToast(
+          "Success",
+          `Followed ${userProfile.name} successfully!`,
+          "success"
+        );
+        userProfile.followers.push(currentUser._id); //! simulate adding to followers
+      }
+      setFollowing(!following);
+    } catch (error) {
+      showToast("Error", error.message, "error");
+    } finally {
+      setUpdating(false);
+    }
   };
   return (
     <VStack gap={4} alignItems={"start"}>
@@ -37,10 +87,10 @@ const UserHeader = () => {
       <Flex justifyContent={"space-between"} w={"full"}>
         <Box>
           <Text fontSize={"2xl"} fontWeight={"bold"} fontFamily={"mono"}>
-            Mark Zuckerberg
+            {userProfile.name}
           </Text>
           <Flex gap={2} alignItems={"center"}>
-            <Text fontSize={"sm"}>zuckerberg</Text>
+            <Text fontSize={"sm"}>{userProfile.username}</Text>
             <Text
               fontSize={"xs"}
               bg={"gray.dark"}
@@ -53,20 +103,58 @@ const UserHeader = () => {
           </Flex>
         </Box>
         <Box>
-          <Avatar name="Mark Zuckerberg" src="/zuck-avatar.png" size={{
-            base: "lg",
-            md:'xl'
-          }} />
+          {userProfile.profilePic && (
+            <Avatar
+              name={userProfile.name}
+              src={userProfile.profilePic}
+              size={{
+                base: "lg",
+                md: "xl",
+              }}
+            />
+          )}
+          {!userProfile.profilePic && (
+            <Avatar
+              name={userProfile.name}
+              src="https://bit.ly/broken-link"
+              size={{
+                base: "lg",
+                md: "xl",
+              }}
+            />
+          )}
         </Box>
       </Flex>
       {/* first section end here */}
-      <Text fontWeight={"semibold"}>
-        CO-Founder excutive chairman and CEO of Meta PlatForms.
-      </Text>
+      <Text fontWeight={"semibold"}>{userProfile.bio}</Text>
+      {/* Add Button based on the user to follow or update statrt here */}
+      {currentUser._id === userProfile._id && (
+        <Link as={RouterLink} to={"/update"}>
+          <Button size={"sm"} colorScheme="yellow">
+            Update Profile
+          </Button>
+        </Link>
+      )}
+      {currentUser._id !== userProfile._id && (
+        <Button
+          isLoading={updating}
+          loadingText={following ? "Following..." : "Unfollowing..."}
+          spinnerPlacement="end"
+          size={"sm"}
+          colorScheme="pink"
+          onClick={handleFollowUnfollowSubmit}
+        >
+          {following ? "Unfollow" : "Follow"}
+        </Button>
+      )}
+      {/* Add Button based on the user to follow or update end here */}
       {/* second section start here  */}
       <Flex justifyContent={"space-between"} w={"full"}>
         <Flex gap={2} alignItems={"center"}>
-          <Text color={"gray.light"}>3.2K Followers</Text>
+          <Text color={"gray.light"}>
+            {userProfile.followers.length}{" "}
+            {userProfile.followers.length > 1 ? "Followers" : "Follower"}
+          </Text>
           <Box w={1} h={1} bg={"gray.light"} borderRadius={"full"}></Box>
           <Link color={"gray.light"}>instagram.com</Link>
         </Flex>
@@ -120,7 +208,6 @@ const UserHeader = () => {
           </Text>
         </Flex>
       </Flex>
-
       {/* third section end here */}
     </VStack>
   );

@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json({limit: "10mb"})); //! allows us to parse incoming requests:req.body
+app.use(express.json({ limit: "10mb" })); //! allows us to parse incoming requests:req.body
 app.use(express.urlencoded({ extended: true })); //! allows us to parse Form Data to req.body
 app.use(cookieParser()); // ! allows us to parse Cookies
 app.use(cors());

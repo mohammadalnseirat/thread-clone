@@ -24,6 +24,7 @@ import userAtom from "../atom/userAtom";
 export default function SigninCard() {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({});
+  const [updating, setUpdating] = useState(false);
   const showToast = useShowToast();
   // ! To Toggle between signup and signin(useSetRecoilState):
   const setAuthScreen = useSetRecoilState(authScreenAtom);
@@ -34,6 +35,7 @@ export default function SigninCard() {
   };
   // !handle Submit Data:
   const handleSbmitData = async () => {
+    setUpdating(true);
     try {
       const res = await fetch("/api/v1/users/signin", {
         method: "POST",
@@ -55,6 +57,8 @@ export default function SigninCard() {
       }
     } catch (error) {
       showToast("Error", error.message, "error");
+    } finally {
+      setUpdating(false);
     }
   };
   return (
@@ -108,7 +112,7 @@ export default function SigninCard() {
             </FormControl>
             <Stack spacing={10} pt={2}>
               <Button
-                loadingText="Submitting"
+                loadingText="Signing in..."
                 size="lg"
                 bg={useColorModeValue("gray.600", "gray.700")}
                 color={"white"}
@@ -116,6 +120,8 @@ export default function SigninCard() {
                   bg: useColorModeValue("gray.700", "gray.800"),
                 }}
                 onClick={handleSbmitData}
+                isLoading={updating}
+                spinnerPlacement="end"
               >
                 Sign In
               </Button>
