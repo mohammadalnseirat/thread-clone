@@ -44,7 +44,7 @@ const UserHeader = ({ userProfile }) => {
       showToast("Error", "Please login to follow/unfollow user", "error");
       return;
     }
-    if(updating){
+    if (updating) {
       showToast("Error", "Please wait while we process your request", "error");
       return;
     }
@@ -85,6 +85,9 @@ const UserHeader = ({ userProfile }) => {
       setUpdating(false);
     }
   };
+  if (!currentUser) {
+    return null;
+  }
   return (
     <VStack gap={4} alignItems={"start"}>
       {/* first section start here */}
@@ -132,7 +135,7 @@ const UserHeader = ({ userProfile }) => {
       {/* first section end here */}
       <Text fontWeight={"semibold"}>{userProfile.bio}</Text>
       {/* Add Button based on the user to follow or update statrt here */}
-      {currentUser._id === userProfile._id && (
+      {currentUser?._id === userProfile?._id && (
         <Link as={RouterLink} to={"/update"}>
           <Button size={"sm"} colorScheme="yellow">
             Update Profile

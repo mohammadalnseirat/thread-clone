@@ -3,6 +3,7 @@ import User from "../models/user.model.js";
 import cloudinary from "../config/cloudinary.js";
 import { handleErrors } from "../utils/error.js";
 import bcryptjs from "bcryptjs";
+import mongoose from "mongoose";
 
 // 1-Function to test the route:
 export const test_get = (req, res, next) => {
@@ -12,11 +13,20 @@ export const test_get = (req, res, next) => {
 const getUserProfile_Get = async (req, res, next) => {
   //! We will fetch user profile either with username or userId
   //! query is either username or userId
-  const { username } = req.params;
+  const { query } = req.params; //* query is either username or userId
   try {
-    const user = await User.findOne({ username })
-      .select("-password")
-      .select("-updatedAt");
+    let user;
+    if (mongoose.Types.ObjectId.isValid(query)) {
+      // ?query is the userId
+      user = await User.findOne({ _id: query })
+        .select("-password")
+        .select("-updatedAt");
+    } else {
+      // ?query is the username
+      user = await User.findOne({ username: query })
+        .select("-password")
+        .select("-updatedAt");
+    }
     if (!user) {
       return next(handleErrors(404, "User Not Found!"));
     }
