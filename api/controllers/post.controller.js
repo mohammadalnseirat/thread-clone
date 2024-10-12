@@ -88,11 +88,11 @@ const deletePost_Delete = async (req, res, next) => {
         )
       );
     }
-    // // !check image and delete:
-    // if (post.image) {
-    //   const imagePuplicId = post.image.split("/").pop().split(".")[0];
-    //   await cloudinary.uploader.destroy(imagePuplicId);
-    // }
+    // !check image and delete:
+    if (post.image) {
+      const imagePuplicId = post.image.split("/").pop().split(".")[0];
+      await cloudinary.uploader.destroy(imagePuplicId);
+    }
     // !delete the post:
     await Post.findByIdAndDelete(id);
     res.status(200).json({ message: "Post has been Deleted  Successfully" });
@@ -190,6 +190,23 @@ const getFeedPosts = async (req, res, next) => {
     next(error);
   }
 };
+// 7-Function to get user post :
+const getUserPosts_Get = async (req, res, next) => {
+  const { username } = req.params;
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return next(handleErrors(404, "User Not Found!"));
+    }
+    const posts = await Post.find({ postedBy: user._id }).sort({
+      createdAt: -1,
+    });
+    res.status(200).json(posts);
+  } catch (error) {
+    console.log("Error Creating Get User Posts Api Route:", error.message);
+    next(error);
+  }
+};
 export {
   createPost_Post,
   getPost_Get,
@@ -197,4 +214,5 @@ export {
   likeUnLikePost_Post,
   replyPost_Post,
   getFeedPosts,
+  getUserPosts_Get,
 };

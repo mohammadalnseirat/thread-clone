@@ -5,6 +5,7 @@ import {
   deletePost_Delete,
   getFeedPosts,
   getPost_Get,
+  getUserPosts_Get,
   likeUnLikePost_Post,
   replyPost_Post,
 } from "../controllers/post.controller.js";
@@ -12,6 +13,7 @@ import {
 const router = express.Router();
 router.get("/feed", protectRoute, getFeedPosts);
 router.get("/:id", getPost_Get);
+router.get("/user/:username", getUserPosts_Get);
 router.post("/createpost", protectRoute, createPost_Post);
 router.put("/likeunlikepost/:id", protectRoute, likeUnLikePost_Post); //!toggle state (like/unlike) post
 router.put("/replypost/:id", protectRoute, replyPost_Post);
