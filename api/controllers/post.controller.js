@@ -45,10 +45,7 @@ const createPost_Post = async (req, res, next) => {
     });
     // !Save The Post and send response back:
     const savedPost = await newPost.save();
-    res.status(200).json({
-      message: "Post Created Successfully",
-      savedPost,
-    });
+    res.status(200).json(savedPost);
   } catch (error) {
     console.log("Error Creating Post Api Route:", error.message);
     next(error);
@@ -158,10 +155,7 @@ const replyPost_Post = async (req, res, next) => {
     // !save the post:
     await post.save();
     // !send response back:
-    res.status(200).json({
-      message: "Reply added Successfully",
-      post,
-    });
+    res.status(200).json(reply);
   } catch (error) {
     console.log("Error Creating Reply Post Api Route:", error.message);
     next(error);

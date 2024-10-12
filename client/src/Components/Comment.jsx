@@ -1,7 +1,5 @@
-import { Avatar, Box, Divider, Flex, Text } from "@chakra-ui/react";
-import React, { useState } from "react";
-import { BsThreeDots } from "react-icons/bs";
-import Actions from "./Actions";
+import { Avatar, Divider, Flex, Text } from "@chakra-ui/react";
+import React from "react";
 
 const Comment = ({ reply, lastReply }) => {
   return (
@@ -33,7 +31,6 @@ const Comment = ({ reply, lastReply }) => {
           </Text> */}
         </Flex>
       </Flex>
-
       {!lastReply ? <Divider bg={"cyan.900"} /> : null}
     </>
   );

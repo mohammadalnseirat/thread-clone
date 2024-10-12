@@ -21,8 +21,10 @@ import { LuImagePlus } from "react-icons/lu";
 import React, { useRef, useState } from "react";
 import usePreviewImage from "../hooks/usePreviewImage";
 import useShowToast from "../hooks/useShowToast";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atom/userAtom";
+import postsAtom from "../atom/postsAtom";
+import { useParams } from "react-router-dom";
 // ?variable for number of characters:
 const MAX_CHARS = 500;
 const CreatePost = () => {
@@ -30,9 +32,12 @@ const CreatePost = () => {
   const currentUser = useRecoilValue(userAtom);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [postText, setPostText] = useState("");
+  const [posts, setPosts] = useRecoilState(postsAtom);
   // !state for reamining number of characters:
   const [remainingCharacters, setRemainingCharacters] = useState(MAX_CHARS);
   const fileImageRef = useRef(null);
+  // get username from params:
+  const { username } = useParams();
   // !Custom Hook for Image and showToast:
   const { imageUrl, handleImageChange, setImageUrl } = usePreviewImage();
   const showToast = useShowToast();
@@ -70,12 +75,13 @@ const CreatePost = () => {
         showToast("Error", data.message, "error");
         return;
       }
-      if (res.ok) {
-        showToast("Success", data.message, "success");
-        onClose();
-        setPostText("");
-        setRemainingCharacters(MAX_CHARS);
-        setImageUrl("");
+      showToast("Success", "Post has been created successfully", "success");
+      onClose();
+      setPostText("");
+      setRemainingCharacters(MAX_CHARS);
+      setImageUrl("");
+      if (username === currentUser.username) {
+        setPosts([data, ...posts]);
       }
     } catch (error) {
       showToast("Error", error.message, "error");
@@ -88,15 +94,21 @@ const CreatePost = () => {
       <Button
         position={"fixed"}
         bottom={10}
-        right={10}
-        rightIcon={<AddIcon />}
+        right={5}
         colorScheme="cyan"
         onClick={onOpen}
+        size={{
+          base: "sm",
+          sm: "md",
+        }}
       >
-        Create Post
+        <AddIcon />
       </Button>
       <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
+        <ModalOverlay
+          bg="blackAlpha.300"
+          backdropFilter="blur(10px) hue-rotate(90deg)"
+        />
         <ModalContent>
           <ModalHeader color={"cyan.500"} fontFamily={"mono"}>
             Create Post

@@ -6,21 +6,22 @@ import useShowToast from "../hooks/useShowToast";
 import { Flex, Heading, Spinner } from "@chakra-ui/react";
 import PostCom from "../Components/PostCom";
 import useGetUserProfile from "../hooks/useGetUserProfile";
+import { useRecoilState } from "recoil";
+import postsAtom from "../atom/postsAtom";
 const UserPage = () => {
   // !fech the profile and pass to userHeader:
   const [userProfile, setUserProfile] = useState(null);
-  
+
   const { username } = useParams();
   const showToast = useShowToast();
   // !state for psots:
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useRecoilState(postsAtom);
   const [fetchingPosts, setFetchingPosts] = useState(true);
   // !custom hook to get user profile:
-  const {user,loading} = useGetUserProfile()
+  const { user, loading } = useGetUserProfile();
 
   // *UseEffect to fetch the data:
   useEffect(() => {
-
     // ?Function to get user post :
     const getUserPosts = async () => {
       setFetchingPosts(true);
@@ -42,8 +43,8 @@ const UserPage = () => {
       }
     };
     getUserPosts();
-  }, [username, showToast]);
-
+  }, [username, showToast, setPosts]);
+  // !some optimization:
   if (!user && loading) {
     return (
       <Flex justifyContent={"center"} alignItems={"center"} h={"100vh"}>

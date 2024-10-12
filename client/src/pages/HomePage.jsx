@@ -3,15 +3,19 @@ import { Link } from "react-router-dom";
 import { Button, Flex, Heading, Spinner } from "@chakra-ui/react";
 import useShowToast from "../hooks/useShowToast";
 import PostCom from "../Components/PostCom";
+import { useRecoilState } from "recoil";
+import postsAtom from "../atom/postsAtom";
 
 const HomePage = () => {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useRecoilState(postsAtom);
   const [loading, setLoading] = useState(true);
   const showToast = useShowToast();
 
   // !useEffect to fetch feed post from database:
   useEffect(() => {
     const getFeedPosts = async () => {
+      setLoading(true);
+      setPosts([]);
       try {
         const res = await fetch("/api/v1/posts/feed");
         const data = await res.json();
@@ -29,7 +33,7 @@ const HomePage = () => {
       }
     };
     getFeedPosts();
-  }, [showToast]);
+  }, [showToast, setPosts]);
   return (
     <>
       {!loading && posts.length === 0 && (

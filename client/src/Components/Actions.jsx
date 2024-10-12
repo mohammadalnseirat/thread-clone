@@ -15,14 +15,15 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atom/userAtom";
 import useShowToast from "../hooks/useShowToast";
-const Actions = ({ post: post_ }) => {
+import postsAtom from "../atom/postsAtom";
+const Actions = ({ post }) => {
   const currentUser = useRecoilValue(userAtom);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [liked, setLiked] = useState(post_?.likes.includes(currentUser?._id));
-  const [post, setPost] = useState(post_);
+  const [liked, setLiked] = useState(post?.likes.includes(currentUser?._id));
+  const [posts, setPosts] = useRecoilState(postsAtom);
   const [reply, setReply] = useState("");
   // !state to optimaize the code:
   const [isLiking, setIsLiking] = useState(false);
@@ -50,14 +51,26 @@ const Actions = ({ post: post_ }) => {
       }
       if (!liked) {
         // !add the id of the cureent user to the post.likes array:
-        setPost({ ...post, likes: [...post.likes, currentUser._id] });
+        const updatedPost = posts.map((p) => {
+          if (p._id === post._id) {
+            return { ...p, likes: [...p.likes, currentUser._id] };
+          }
+          return p;
+        });
+        setPosts(updatedPost);
         showToast("Success", data.message, "success");
       } else {
         // !remove the id of the cureent user from the post.likes array:
-        setPost({
-          ...post,
-          likes: post.likes.filter((id) => id !== currentUser._id),
+        const updatedPost = posts.map((p) => {
+          if (p._id === post._id) {
+            return {
+              ...p,
+              likes: p.likes.filter((id) => id !== currentUser._id),
+            };
+          }
+          return p;
         });
+        setPosts(updatedPost);
         showToast("Success", data.message, "success");
       }
       // !toggle the liked state:
@@ -88,12 +101,16 @@ const Actions = ({ post: post_ }) => {
         showToast("Error", data.message, "error");
         return;
       }
-      if (res.ok) {
-        setPost({ ...post, replies: [...post.replies, data.reply] });
-        showToast("Success", "Reply has been posted successfully!", "success");
-        setReply("");
-        onClose();
-      }
+      const updatedPostReply = posts.map((p) => {
+        if (p._id === post._id) {
+          return { ...p, replies: [...p.replies, data] };
+        }
+        return p;
+      });
+      setPosts(updatedPostReply);
+      showToast("Success", "Reply has been posted successfully!", "success");
+      setReply("");
+      onClose();
     } catch (error) {
       showToast("Error", error.message, "error");
     } finally {
@@ -154,7 +171,10 @@ const Actions = ({ post: post_ }) => {
         </Text>
       </Flex>
       <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
+        <ModalOverlay
+          bg="blackAlpha.300"
+          backdropFilter="blur(10px) hue-rotate(90deg)"
+        />
         <ModalContent border={"1px solid"} borderColor={"cyan.500"}>
           <ModalHeader color={"cyan.500"} fontFamily={"mono"}>
             Add Your Comment:

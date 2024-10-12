@@ -4,6 +4,7 @@ import cloudinary from "../config/cloudinary.js";
 import { handleErrors } from "../utils/error.js";
 import bcryptjs from "bcryptjs";
 import mongoose from "mongoose";
+import Post from "../models/post.model.js";
 
 // 1-Function to test the route:
 export const test_get = (req, res, next) => {
@@ -219,6 +220,25 @@ const updateUser_Put = async (req, res, next) => {
     user.bio = bio || user.bio;
 
     user = await user.save();
+    //! Find all posts that this user replied and update username and userProfilePic fields
+    await Post.updateMany(
+      {
+        "replies.userId": userId,
+      },
+      {
+        $set: {
+          "replies.$[reply].username": user.username,
+          "replies.$[reply].userProfilePic": user.profilePic,
+        },
+      },
+      {
+        arrayFilters: [
+          {
+            "reply.userId": userId,
+          },
+        ],
+      }
+    );
     // !password must be null in response:
     user.password = null;
     res.status(200).json(user);

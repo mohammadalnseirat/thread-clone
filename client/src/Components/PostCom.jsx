@@ -21,8 +21,9 @@ import Actions from "./Actions";
 import useShowToast from "../hooks/useShowToast";
 import { formatDistanceToNow } from "date-fns";
 import { DeleteIcon } from "@chakra-ui/icons";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atom/userAtom";
+import postsAtom from "../atom/postsAtom";
 
 const PostCom = ({ post, postedBy }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -32,6 +33,8 @@ const PostCom = ({ post, postedBy }) => {
   const [isdeleted, setIsdeleted] = useState(false);
   // !get the current user:
   const currentUser = useRecoilValue(userAtom);
+  // !state global:
+  const [posts, setPosts] = useRecoilState(postsAtom);
 
   // !useEffect To fetch profile user based on postedBy:
   useEffect(() => {
@@ -72,6 +75,7 @@ const PostCom = ({ post, postedBy }) => {
       if (res.ok) {
         showToast("Success", data.message, "success");
         onClose();
+        setPosts(posts.filter((p) => p._id !== post._id));
       }
     } catch (error) {
       showToast("Error", error.message, "error");

@@ -30,11 +30,21 @@ const App = () => {
           path={"/update"}
           element={user ? <UpdateProfilePage /> : <Navigate to={"/auth"} />}
         />
-        <Route path="/:username" element={<UserPage />} />
+        <Route
+          path="/:username"
+          element={
+            user ? (
+              <>
+                <UserPage />
+                <CreatePost />
+              </>
+            ) : (
+              <UserPage />
+            )
+          }
+        />
         <Route path="/:username/post/:pId" element={<PostPage />} />
       </Routes>
-      {user && <LoggOutButton />}
-      {user && <CreatePost />}
     </Container>
   );
 };
