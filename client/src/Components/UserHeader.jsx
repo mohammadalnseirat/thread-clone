@@ -21,12 +21,12 @@ import { useRecoilValue } from "recoil";
 import userAtom from "../atom/userAtom";
 import { Link as RouterLink } from "react-router-dom";
 
-const UserHeader = ({ userProfile }) => {
+const UserHeader = ({ user }) => {
   // !get cureent user:
   const currentUser = useRecoilValue(userAtom);
   // !state to following user:
   const [following, setFollowing] = useState(
-    userProfile.followers.includes(currentUser?._id)
+    user.followers.includes(currentUser?._id)
   );
   // !state For Loading:
   const [updating, setUpdating] = useState(false);
@@ -50,7 +50,7 @@ const UserHeader = ({ userProfile }) => {
     }
     setUpdating(true);
     try {
-      const res = await fetch(`/api/v1/users/follow/${userProfile._id}`, {
+      const res = await fetch(`/api/v1/users/follow/${user._id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -65,18 +65,14 @@ const UserHeader = ({ userProfile }) => {
         // ?unfollow user:
         showToast(
           "Success",
-          `Unfollowed ${userProfile.name} successfully!`,
+          `Unfollowed ${user.name} successfully!`,
           "success"
         );
-        userProfile.followers.pop(); //! simulate removing from followers
+        user.followers.pop(); //! simulate removing from followers
       } else {
         // ?follow user:
-        showToast(
-          "Success",
-          `Followed ${userProfile.name} successfully!`,
-          "success"
-        );
-        userProfile.followers.push(currentUser._id); //! simulate adding to followers
+        showToast("Success", `Followed ${user.name} successfully!`, "success");
+        user.followers.push(currentUser._id); //! simulate adding to followers
       }
       setFollowing(!following);
     } catch (error) {
@@ -94,10 +90,10 @@ const UserHeader = ({ userProfile }) => {
       <Flex justifyContent={"space-between"} w={"full"}>
         <Box>
           <Text fontSize={"2xl"} fontWeight={"bold"} fontFamily={"mono"}>
-            {userProfile.name}
+            {user.name}
           </Text>
           <Flex gap={2} alignItems={"center"}>
-            <Text fontSize={"sm"}>{userProfile.username}</Text>
+            <Text fontSize={"sm"}>{user.username}</Text>
             <Text
               fontSize={"xs"}
               bg={"gray.dark"}
@@ -110,17 +106,17 @@ const UserHeader = ({ userProfile }) => {
           </Flex>
         </Box>
         <Box>
-          {userProfile.profilePic && (
+          {user.profilePic && (
             <Avatar
-              name={userProfile.name}
-              src={userProfile.profilePic}
+              name={user.name}
+              src={user.profilePic}
               size={{
                 base: "lg",
                 md: "xl",
               }}
             />
           )}
-          {!userProfile.profilePic && (
+          {!user.profilePic && (
             <Avatar
               name={userProfile.name}
               src="https://bit.ly/broken-link"
@@ -133,16 +129,16 @@ const UserHeader = ({ userProfile }) => {
         </Box>
       </Flex>
       {/* first section end here */}
-      <Text fontWeight={"semibold"}>{userProfile.bio}</Text>
+      <Text fontWeight={"semibold"}>{user.bio}</Text>
       {/* Add Button based on the user to follow or update statrt here */}
-      {currentUser?._id === userProfile?._id && (
+      {currentUser?._id === user?._id && (
         <Link as={RouterLink} to={"/update"}>
           <Button size={"sm"} colorScheme="yellow">
             Update Profile
           </Button>
         </Link>
       )}
-      {currentUser._id !== userProfile._id && (
+      {currentUser._id !== user._id && (
         <Button
           isLoading={updating}
           loadingText={following ? "Following..." : "Unfollowing..."}
@@ -159,8 +155,8 @@ const UserHeader = ({ userProfile }) => {
       <Flex justifyContent={"space-between"} w={"full"}>
         <Flex gap={2} alignItems={"center"}>
           <Text color={"gray.light"}>
-            {userProfile.followers.length}{" "}
-            {userProfile.followers.length > 1 ? "Followers" : "Follower"}
+            {user.followers.length}{" "}
+            {user.followers.length > 1 ? "Followers" : "Follower"}
           </Text>
           <Box w={1} h={1} bg={"gray.light"} borderRadius={"full"}></Box>
           <Link color={"gray.light"}>instagram.com</Link>
