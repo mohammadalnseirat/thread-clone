@@ -10,6 +10,7 @@ import useLogOut from "../hooks/useLogOut";
 import { PiSignInBold } from "react-icons/pi";
 import { SiGnuprivacyguard } from "react-icons/si";
 import authScreenAtom from "../atom/authAtom";
+import { BsChatSquareText } from "react-icons/bs";
 
 const Header = () => {
   // !get the current user:
@@ -47,6 +48,9 @@ const Header = () => {
         <Flex alignItems={"center"} gap={4}>
           <Link as={RouterLink} to={`/${currentUser.username}`}>
             <RxAvatar size={24} />
+          </Link>
+          <Link as={RouterLink} to={'/chat'}>
+            <BsChatSquareText size={24} color="orange" />
           </Link>
           <Button colorScheme="yellow" size={"xs"} onClick={handleLogout}>
             <RiLogoutCircleRLine size={24} title="Log out" />
