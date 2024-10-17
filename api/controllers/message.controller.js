@@ -81,4 +81,24 @@ const getAllMessages_Get = async (req, res, next) => {
   }
 };
 
-export { sendMessage_Post, getAllMessages_Get };
+// !3-Function To Get All Conversations:
+const getAllConversations_Get = async (req, res, next) => {
+  const userId = req.user._id;
+  try {
+    // Find All Conversations:
+    const conversations = await Conversation.find({
+      participants: userId,
+    }).populate({
+      path: "participants",
+      select: "username profilePic",
+    });
+
+    //! Send response back:
+    res.status(200).json(conversations);
+  } catch (error) {
+    console.log("Error in getting conversations:", error.message);
+    next(error);
+  }
+};
+
+export { sendMessage_Post, getAllMessages_Get, getAllConversations_Get };
