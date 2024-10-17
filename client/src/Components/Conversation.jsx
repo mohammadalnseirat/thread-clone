@@ -5,13 +5,25 @@ import {
   Image,
   Stack,
   Text,
+  useColorModeValue,
   WrapItem,
 } from "@chakra-ui/react";
 import React from "react";
 
 const Conversation = () => {
   return (
-    <Flex alignItems={"center"} mt={2} gap={4} p={2} borderRadius={"lg"}>
+    <Flex
+      alignItems={"center"}
+      mt={1}
+      gap={4}
+      p={2}
+      borderRadius={"lg"}
+      _hover={{
+        bg: useColorModeValue("gray.600", "gray.dark"),
+        cursor: "pointer",
+        color: "white",
+      }}
+    >
       {/* Add Your Conversation Here */}
       <WrapItem>
         <Avatar

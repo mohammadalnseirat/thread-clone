@@ -14,7 +14,13 @@ import MessageInput from "./MessageInput";
 
 const MessageContainer = () => {
   return (
-    <Flex flex={70} borderEndRadius={"md"} p={2} flexDirection={"column"}>
+    <Flex
+      flex={70}
+      borderEndRadius={"md"}
+      p={1}
+      bg={useColorModeValue("gray.200", "gray.dark")}
+      flexDirection={"column"}
+    >
       {/* Message Header start here */}
       <Flex alignItems={"center"} w={"full"} h={12} gap={2}>
         <Avatar src="" size={"sm"} />

@@ -5,12 +5,13 @@ import cookieParser from "cookie-parser";
 import { connectMongoDataBase } from "./db/connectDB.js";
 import userRoutes from "./routes/user.route.js";
 import postRoutes from "./routes/post.route.js";
+import messageRoutes from "./routes/message.route.js";
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json({ limit: "10mb" })); //! allows us to parse incoming requests:req.body
+app.use(express.json({ limit: "50mb" })); //! allows us to parse incoming requests:req.body
 app.use(express.urlencoded({ extended: true })); //! allows us to parse Form Data to req.body
 app.use(cookieParser()); // ! allows us to parse Cookies
 app.use(cors());
@@ -18,6 +19,7 @@ app.use(cors());
 // Routes:
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/posts", postRoutes);
+app.use("/api/v1/messages", messageRoutes);
 
 // Listen To The Port:
 app.listen(PORT, () => {
